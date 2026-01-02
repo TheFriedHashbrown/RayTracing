@@ -1,5 +1,9 @@
+#ifndef COLOR_H
+#define COLOR_H
+
+#include "vec3.h"
 #include<stdio.h>
-#include<vec3.h>
+#include<iostream>
 
 inline std::ostream& write_color(std::ostream &out, const vec3& pixel_color) {
     double r = pixel_color.x();
@@ -12,3 +16,5 @@ inline std::ostream& write_color(std::ostream &out, const vec3& pixel_color) {
 
     return out << red << ' ' << green << ' ' << blue << "\n";
 }
+
+#endif
