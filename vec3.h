@@ -18,9 +18,9 @@ class vec3{
     }
 
     // Accessing the x,y,z values of the vector
-    double x() { return e[0]; }
-    double y() { return e[1]; }
-    double z() { return e[2]; }
+    double x() const { return e[0]; }
+    double y() const { return e[1]; }
+    double z() const { return e[2]; }
 
     //Operator overloading functions
     double& operator[] (int i) { return e[i]; }
