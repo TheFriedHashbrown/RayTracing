@@ -5,7 +5,7 @@
 #include "Color.h"
 #include "Ray.h"
 
-vec3 ray_color();
+vec3 ray_color(const Ray& r);
 
 int main(){
     //Setting the canvas size
@@ -16,18 +16,30 @@ int main(){
     testFile << "P3\n" << img_width << " " << img_height << "\n255\n";
     //P3 identifes that it is a ppm file, then the width and height and 255 is the maximum colour value of a pixel in the map
 
+    auto aspect_ratio = double(img_width) / img_height;
+    double viewport_height = 2.0;
+    double viewport_width = aspect_ratio * viewport_height;
+    double focal_length = 1.0;
+    vec3 origin = vec3 (0, 0, 0);
+    vec3 horizontal = vec3 (viewport_width, 0, 0);
+    vec3 vertical = vec3 (0, viewport_height, 0);
+    vec3 bottom_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
 
+    for (int i = img_height - 1; i >= 0 ; i--)
+    {
+        for (int j = 0; j < img_width; j++){
+            //Converting it into percentages that are then used to find the x and y components of the vector
+            double u = double(j) / (img_width - 1);
+            double v = double(i) / (img_height - 1);
 
-    for (int i = 0; i < img_height; ++i){
-        for (int j = 0; j < img_width; ++j){
-            double r = double(j) / (img_width - 1);
-            double g = double(i) / (img_height - 1);
-            double b = 0;
+            vec3 dir = bottom_left_corner + u*horizontal + v*vertical - origin;
 
-            vec3 pixel_color (r, g, b);
-            write_color(testFile, pixel_color);
+            Ray r(origin, dir);
+            vec3 pixel_color = ray_color(r);
+            write_color (testFile, pixel_color);
         }
     }
+    
     testFile.close();
 }
 
