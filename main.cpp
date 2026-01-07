@@ -4,8 +4,9 @@
 #include "Vec3.h"
 #include "Color.h"
 #include "Ray.h"
+#include <cmath>
 
-bool hit_sphere (const vec3& center, double radius, const Ray& r);
+double hit_sphere (const vec3& center, double radius, const Ray& r);
 vec3 ray_color(const Ray& r);
 
 int main(){
@@ -46,23 +47,33 @@ int main(){
 
 //Writing a function for the background
 vec3 ray_color (const Ray& r){
-    if (hit_sphere(vec3(0, 0, -1), 0.25, r)){
-        return vec3(1, 0, 0);
+    double val = hit_sphere(vec3(0, 0, -1), 0.5, r);
+    if (val > 0){
+        vec3 point = r.at(val);
+        //tells what point on the ray it is on
+        vec3 normal = point - vec3(0, 0, -1);
+
+        normal = unit_vector(normal);
+        normal = 0.5 * (normal + vec3(1, 1, 1));
+        //Normalization
+
+        return normal;
     }
-
-    //Normalizes the vector to have a y value from -1 to 1
-    vec3 unit = unit_vector(r.direction());
-    
-    //Scales it from 0 to 1 so that we can use t as percentage
-    double t = 0.5 * (unit.y() + 1);
-
-    //Creating a gradient from white to blue for the background
-    vec3 start_val = vec3(1.0, 1.0, 1.0);
-    vec3 end_val = vec3(0.5, 0.7, 1.0);
-    return ((1.0 - t) * start_val) + (t * end_val);
+    else if (val <= 0){
+        //Normalizes the vector to have a y value from -1 to 1
+        vec3 unit = unit_vector(r.direction());
+        
+        //Scales it from 0 to 1 so that we can use t as percentage
+        double t = 0.5 * (unit.y() + 1);
+        
+        //Creating a gradient from white to blue for the background
+        vec3 start_val = vec3(1.0, 1.0, 1.0);
+        vec3 end_val = vec3(0.5, 0.7, 1.0);
+        return ((1.0 - t) * start_val) + (t * end_val);
+    }
 }
 
-bool hit_sphere (const vec3& center, double radius, const Ray& r){
+double hit_sphere (const vec3& center, double radius, const Ray& r){
     //According to the equation, we find out whether or not the point lies on the circle
     vec3 oc = r.origin() - center;
 
@@ -71,5 +82,12 @@ bool hit_sphere (const vec3& center, double radius, const Ray& r){
     double c = dot(oc, oc) - radius*radius;
 
     double discriminant = b*b - 4*a*c;
-    return (discriminant > 0);
+    if (discriminant < 0) {
+        return -1.0;
+    }
+    else {
+        double t = -b - sqrt(discriminant);
+        t /= 2*a;
+        return t;
+    }
 }
