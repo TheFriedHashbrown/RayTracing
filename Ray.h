@@ -10,7 +10,6 @@ class Ray{
     vec3 dir;
 
     Ray () {
-
     }
 
     Ray (vec3 orig, vec3 dir){

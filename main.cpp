@@ -1,6 +1,7 @@
 #include<stdio.h>
 #include<iostream>
 #include<fstream>
+#include<vector>
 #include "Vec3.h"
 #include "Color.h"
 #include "Ray.h"
@@ -15,7 +16,7 @@ int main(){
     int img_width = 256;
     int img_height = 256;
 
-    std::ofstream testFile("Plane.ppm");
+    std::ofstream testFile("image.ppm");
     testFile << "P3\n" << img_width << " " << img_height << "\n255\n";
     //P3 identifes that it is a ppm file, then the width and height and 255 is the maximum colour value of a pixel in the map
 
@@ -61,10 +62,6 @@ vec3 ray_color (const Ray& r){
         return normal;
     }
 
-    double plane_val = plane(vec3(0, -0.5, 0), vec3(0, 1, 0), r);
-    if (plane_val > 0){
-        return vec3(0.5, 0.8, 0.5);
-    }
 
     if (sphere_val <= 0){
         //Normalizes the vector to have a y value from -1 to 1
@@ -80,24 +77,6 @@ vec3 ray_color (const Ray& r){
     }
 }
 
-double hit_sphere (const vec3& center, double radius, const Ray& r){
-    //According to the equation, we find out whether or not the point lies on the circle
-    vec3 oc = r.origin() - center;
-
-    double a = dot(r.direction(), r.direction());
-    double b = 2.0 * dot(oc, r.direction());
-    double c = dot(oc, oc) - radius*radius;
-
-    double discriminant = b*b - 4*a*c;
-    if (discriminant < 0) {
-        return -1.0;
-    }
-    else {
-        double t = -b - sqrt(discriminant);
-        t /= 2*a;
-        return t;
-    }
-}
 
 double plane (const vec3& point_on_plane, const vec3& plane_normal, const Ray& r){
     double num = dot((point_on_plane - r.origin()), plane_normal);
