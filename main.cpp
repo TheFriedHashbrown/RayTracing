@@ -7,6 +7,7 @@
 #include <cmath>
 
 double hit_sphere (const vec3& center, double radius, const Ray& r);
+double plane (const vec3& point_on_plane, const vec3& plane_normal, const Ray& r);
 vec3 ray_color(const Ray& r);
 
 int main(){
@@ -14,7 +15,7 @@ int main(){
     int img_width = 256;
     int img_height = 256;
 
-    std::ofstream testFile("image.ppm");
+    std::ofstream testFile("Plane.ppm");
     testFile << "P3\n" << img_width << " " << img_height << "\n255\n";
     //P3 identifes that it is a ppm file, then the width and height and 255 is the maximum colour value of a pixel in the map
 
@@ -47,9 +48,9 @@ int main(){
 
 //Writing a function for the background
 vec3 ray_color (const Ray& r){
-    double val = hit_sphere(vec3(0, 0, -1), 0.5, r);
-    if (val > 0){
-        vec3 point = r.at(val);
+    double sphere_val = hit_sphere(vec3(0, 0, -1), 0.5, r);
+    if (sphere_val > 0){
+        vec3 point = r.at(sphere_val);
         //tells what point on the ray it is on
         vec3 normal = point - vec3(0, 0, -1);
 
@@ -59,7 +60,13 @@ vec3 ray_color (const Ray& r){
 
         return normal;
     }
-    else if (val <= 0){
+
+    double plane_val = plane(vec3(0, -0.5, 0), vec3(0, 1, 0), r);
+    if (plane_val > 0){
+        return vec3(0.5, 0.8, 0.5);
+    }
+
+    if (sphere_val <= 0){
         //Normalizes the vector to have a y value from -1 to 1
         vec3 unit = unit_vector(r.direction());
         
@@ -90,4 +97,14 @@ double hit_sphere (const vec3& center, double radius, const Ray& r){
         t /= 2*a;
         return t;
     }
+}
+
+double plane (const vec3& point_on_plane, const vec3& plane_normal, const Ray& r){
+    double num = dot((point_on_plane - r.origin()), plane_normal);
+    double denom = dot(r.direction(), plane_normal);
+    
+    if (std::abs(denom) < 0.000001) return -1;
+
+    double t = num/denom;
+    return t;
 }
