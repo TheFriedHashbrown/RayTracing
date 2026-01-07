@@ -2,14 +2,18 @@
 #include<iostream>
 #include<fstream>
 #include<vector>
+#include<memory>
+#include <cmath>
+#include<limits>
+
 #include "Vec3.h"
 #include "Color.h"
 #include "Ray.h"
-#include <cmath>
+#include "Hittable.h"
+#include "Sphere.h"
+#include "HittableList.h"
 
-double hit_sphere (const vec3& center, double radius, const Ray& r);
-double plane (const vec3& point_on_plane, const vec3& plane_normal, const Ray& r);
-vec3 ray_color(const Ray& r);
+vec3 ray_color(const Ray& r, Hittable& obj);
 
 int main(){
     //Setting the canvas size
@@ -29,6 +33,10 @@ int main(){
     vec3 vertical = vec3 (0, viewport_height, 0);
     vec3 bottom_left_corner = origin - horizontal/2 - vertical/2 - vec3(0, 0, focal_length);
 
+    hittable_list world;
+    world.add_object(make_shared<sphere>(vec3(0, 0, -1), 0.5));
+    world.add_object(make_shared<sphere>(vec3(0, -100.5, -1), 100));
+
     for (int i = img_height - 1; i >= 0 ; i--)
     {
         for (int j = 0; j < img_width; j++){
@@ -39,7 +47,7 @@ int main(){
             vec3 dir = bottom_left_corner + u*horizontal + v*vertical - origin;
 
             Ray r(origin, dir);
-            vec3 pixel_color = ray_color(r);
+            vec3 pixel_color = ray_color(r, world);
             write_color (testFile, pixel_color);
         }
     }
@@ -47,43 +55,20 @@ int main(){
     testFile.close();
 }
 
-//Writing a function for the background
-vec3 ray_color (const Ray& r){
-    double sphere_val = hit_sphere(vec3(0, 0, -1), 0.5, r);
-    if (sphere_val > 0){
-        vec3 point = r.at(sphere_val);
-        //tells what point on the ray it is on
-        vec3 normal = point - vec3(0, 0, -1);
-
-        normal = unit_vector(normal);
-        normal = 0.5 * (normal + vec3(1, 1, 1));
-        //Normalization
-
+vec3 ray_color (const Ray& r, Hittable& obj){
+    hit_record record;
+    bool present = obj.hit(r, 0.001, std::numeric_limits<double>::infinity(), record);
+    
+    if (present){
+        vec3 normal = 0.5 * (unit_vector(record.normal) + vec3(1, 1, 1));
         return normal;
     }
-
-
-    if (sphere_val <= 0){
-        //Normalizes the vector to have a y value from -1 to 1
-        vec3 unit = unit_vector(r.direction());
-        
-        //Scales it from 0 to 1 so that we can use t as percentage
-        double t = 0.5 * (unit.y() + 1);
-        
-        //Creating a gradient from white to blue for the background
-        vec3 start_val = vec3(1.0, 1.0, 1.0);
-        vec3 end_val = vec3(0.5, 0.7, 1.0);
-        return ((1.0 - t) * start_val) + (t * end_val);
-    }
-}
-
-
-double plane (const vec3& point_on_plane, const vec3& plane_normal, const Ray& r){
-    double num = dot((point_on_plane - r.origin()), plane_normal);
-    double denom = dot(r.direction(), plane_normal);
     
-    if (std::abs(denom) < 0.000001) return -1;
+    vec3 unit = unit_vector(r.direction());
+    double val = 0.5 * (unit.y() + 1);
 
-    double t = num/denom;
-    return t;
+    vec3 end_val = vec3(0.5, 0.7, 1.0);
+    vec3 start_val = vec3(1.0, 1.0, 1.0);
+
+    return (1 - val) * start_val + val * end_val;
 }
