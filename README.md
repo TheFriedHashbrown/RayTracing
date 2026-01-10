@@ -1,4 +1,4 @@
-#RayTracing
+# RayTracing
 
 A C++ implementation of a ray tracer
 
