@@ -33,7 +33,8 @@ We moved away from hard-coded math in `main.cpp` to a flexible, object-oriented 
 The engine currently renders a scene containing:
 1.  **A Center Sphere:** Rendered with surface normal coloring.
 2.  **A Floor:** Simulated using a massive sphere (Radius 100) positioned just below the camera view.
-Here is the output produced (Converted from ppm to png for display)
+
+Here is the output produced (Converted from ppm to png for display):
 
 ![Ray Tracer Output](output.png)
 
